@@ -1,7 +1,10 @@
 # https://github.com/tsedlar
 name: CI
 
-on: push
+on:
+  schedule:
+    # only run on a schedule, every 30 minutes
+    - cron:  0/30 * * * *
 
 jobs:
   update_gamepack:
