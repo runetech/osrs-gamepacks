@@ -1,0 +1,40 @@
+# https://github.com/tsedlar
+name: CI
+
+on:
+  schedule:
+    # only run on a schedule, every 30 minutes
+    - cron:  0/30 * * * *
+
+jobs:
+  update_gamepack:
+    runs-on: ubuntu-latest
+    container:
+      # image with AdoptOpenJDK 8 and git installed
+      image: mahabal/adoptopenjdk8-git:latest
+
+    steps:
+      - uses: actions/checkout@master
+        with:
+          ref: ${{ github.ref }}
+      - name: Deploy gamepack
+        run: |
+
+          cd gamepacks/
+
+          curl -sL https://github.com/runetech/osrs-gamepack-downloader/releases/download/v1.2/osrs-gamepack-downloader.jar -o downloader.jar
+
+          REPO=$(echo ${{ github.repository }} | sed "s:.*/::")
+          BRANCH=$(echo ${{ github.ref }} | sed "s:.*/::")
+
+          git remote rm origin
+          git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git config user.name ${{ github.actor }}
+          git config user.email noreply@${{ github.actor }}.noreply.github.com
+
+          OSRS_REV=$(java -jar downloader.jar -r)
+
+          rm -f downloader.jar
+
+          git add .
+          git diff-index --quiet HEAD || GIT_AUTHOR_DATE=\"$(date -ur osrs-${OSRS_REV}.jar)\" GIT_COMMITTER_DATE=\"$(date -ur osrs-${OSRS_REV}.jar)\" git commit -am "Add osrs-${OSRS_REV}.jar" && git push origin HEAD:${BRANCH}
