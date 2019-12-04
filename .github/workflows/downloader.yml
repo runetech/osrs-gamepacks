@@ -14,7 +14,7 @@ jobs:
       image: mahabal/adoptopenjdk8-git:latest
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v1.2.0
         with:
           ref: ${{ github.ref }}
       - name: Deploy gamepack
