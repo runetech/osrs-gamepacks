@@ -23,7 +23,7 @@ jobs:
           mkdir -p jav_configs
           cd gamepacks/
 
-          curl -sL https://github.com/runetech/osrs-gamepack-downloader/releases/download/v1.2/osrs-gamepack-downloader.jar -o downloader.jar
+          curl -sL https://github.com/runetech/osrs-gamepack-downloader/releases/download/v1.3/osrs-gamepack-downloader.jar -o downloader.jar
 
           REPO=$(echo ${{ github.repository }} | sed "s:.*/::")
           BRANCH=$(echo ${{ github.ref }} | sed "s:.*/::")
