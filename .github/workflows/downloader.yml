@@ -20,6 +20,7 @@ jobs:
       - name: Deploy gamepack
         run: |
 
+          mkdir -p jav_configs
           cd gamepacks/
 
           curl -sL https://github.com/runetech/osrs-gamepack-downloader/releases/download/v1.2/osrs-gamepack-downloader.jar -o downloader.jar
@@ -32,9 +33,17 @@ jobs:
           git config user.name ${{ github.actor }}
           git config user.email noreply@${{ github.actor }}.noreply.github.com
 
+          JAV_CONFIG=$(java -jar downloader.jar -p --dry-run)
           OSRS_REV=$(java -jar downloader.jar -r)
 
           rm -f downloader.jar
 
           git add .
           git diff-index --quiet HEAD || GIT_AUTHOR_DATE=\"$(date -ur osrs-${OSRS_REV}.jar)\" GIT_COMMITTER_DATE=\"$(date -ur osrs-${OSRS_REV}.jar)\" git commit -am "Add osrs-${OSRS_REV}.jar" && git push origin HEAD:${BRANCH}
+
+          cd ../jav_configs
+          echo $JAV_CONFIG >> jav_config_${OSRS_REV}.ws
+
+          git add .
+          git diff-index --quiet HEAD || git commit -am "Add jav_config.ws for osrs-${OSRS_REV}.jar" && git push origin HEAD:${BRANCH}
+
