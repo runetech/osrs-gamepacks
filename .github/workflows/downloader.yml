@@ -42,7 +42,7 @@ jobs:
           git diff-index --quiet HEAD || GIT_AUTHOR_DATE=\"$(date -ur osrs-${OSRS_REV}.jar)\" GIT_COMMITTER_DATE=\"$(date -ur osrs-${OSRS_REV}.jar)\" git commit -am "Add osrs-${OSRS_REV}.jar" && git push origin HEAD:${BRANCH}
 
           cd ../jav_configs
-          echo $JAV_CONFIG >> jav_config_${OSRS_REV}.ws
+          echo "${JAV_CONFIG}" >> jav_config_${OSRS_REV}.ws
 
           git add .
           git diff-index --quiet HEAD || git commit -am "Add jav_config.ws for osrs-${OSRS_REV}.jar" && git push origin HEAD:${BRANCH}
