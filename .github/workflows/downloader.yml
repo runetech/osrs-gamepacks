@@ -49,7 +49,7 @@ jobs:
           git diff-index --quiet HEAD || git commit -am "Add jav_config.ws for osrs-${OSRS_REV}.jar" && git push origin HEAD:${BRANCH}
           
           cd ../world_list
-          WORLD_LIST_URL=$(echo "${JAV_CONFIG" | grep param_17); echo ${line#"param_17="};
+          WORLD_LIST_URL=$(echo "${JAV_CONFIG}" | grep param_17); echo ${line#"param_17="};
           curl -sL $WORLD_LIST_URL -o slr.ws
           
           git add .
