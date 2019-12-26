@@ -21,6 +21,7 @@ jobs:
         run: |
 
           mkdir -p jav_configs
+          mkdir -p world_list
           cd gamepacks/
 
           curl -sL https://github.com/runetech/osrs-gamepack-downloader/releases/download/v1.3/osrs-gamepack-downloader.jar -o downloader.jar
@@ -43,7 +44,13 @@ jobs:
 
           cd ../jav_configs
           echo "${JAV_CONFIG}" > jav_config_${OSRS_REV}.ws
-
+          
           git add .
           git diff-index --quiet HEAD || git commit -am "Add jav_config.ws for osrs-${OSRS_REV}.jar" && git push origin HEAD:${BRANCH}
+          
+          cd ../world_list
+          WORLD_LIST_URL=$(cat jav_config.ws | grep param_17); echo ${line#"param_17="};
+          curl -sL $WORLD_LIST_URL -o slr.ws
+          git add .
+          git diff-index --quiet HEAD || git commit -am "Update world list for for osrs-${OSRS_REV}.jar" && git push origin HEAD:${BRANCH}
 
