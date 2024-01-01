@@ -11,7 +11,7 @@ codebase=http://oldschool70.runescape.com/
 download=2397060
 gedigesturl=https://secure.runescape.com/m=itemdb_oldschool/g=oldscape/digest.csv
 initial_class=client.class
-initial_jar=gamepack_1543830.jar
+initial_jar=gamepack_4928229.jar
 mac_sub_version=2
 msg_cancel=Cancel
 msg_changes_on_restart=Your changes will take effect when you next start this program.
@@ -36,7 +36,7 @@ msg_new_version_link=http://oldschool.runescape.com/
 msg_new_version_linktext=Open OldSchool Homepage
 msg_ok=OK
 msg_options=Options
-msg_tandc=This game is copyright Â© 1999 - 2023 Jagex Ltd.Use of this game is subject to our ["http://www.runescape.com/terms/terms.ws"Terms and Conditions] and ["http://www.runescape.com/privacy/privacy.ws"Privacy Policy].
+msg_tandc=This game is copyright Â© 1999 - 2024 Jagex Ltd.Use of this game is subject to our ["http://www.runescape.com/terms/terms.ws"Terms and Conditions] and ["http://www.runescape.com/privacy/privacy.ws"Privacy Policy].
 other_sub_version=2
 param_10=5
 param_11=https://auth.jagex.com/
