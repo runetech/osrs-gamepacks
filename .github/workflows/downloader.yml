@@ -12,8 +12,21 @@ jobs:
     container:
       # image with AdoptOpenJDK 8 and git installed
       image: mahabal/adoptopenjdk8-git:latest
+      volumes:
+        # override /__e/node20 because GitHub Actions uses a version that requires too-recent glibc
+        # see "Install node.js for GitHub Actions" below
+        - /tmp:/__e/node20
 
     steps:
+      - name: Install node.js for GitHub Actions
+        run: |
+          apt-get install -y curl ca-certificates &&
+          # Install a Node.js version that works in older Ubuntu containers (read: does not require very recent glibc)
+          NODE_VERSION=v20.18.1 &&
+          NODE_TAR_FILE=node-$NODE_VERSION-linux-x64-glibc-217.tar.gz &&
+          NODE_URL=https://unofficial-builds.nodejs.org/download/release/$NODE_VERSION/$NODE_TAR_FILE &&
+          curl -Lo /tmp/$NODE_TAR_FILE $NODE_URL &&
+          tar -C /__e/node20 -x --strip-components=1 -f /tmp/$NODE_TAR_FILE
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
