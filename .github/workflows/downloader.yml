@@ -30,6 +30,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
+        env:
+          PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       - name: Deploy gamepack
         run: |
 
