@@ -27,6 +27,10 @@ jobs:
           NODE_URL=https://unofficial-builds.nodejs.org/download/release/$NODE_VERSION/$NODE_TAR_FILE &&
           curl -Lo /tmp/$NODE_TAR_FILE $NODE_URL &&
           tar -C /__e/node20 -x --strip-components=1 -f /tmp/$NODE_TAR_FILE
+      - name: Hack to make Git work
+        run: |
+          # one time fix to avoid permission problems later on
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
