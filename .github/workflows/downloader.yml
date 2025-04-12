@@ -1,77 +1,61 @@
-# https://github.com/tsedlar
-name: CI
+name: Gamepack CI
 
 on:
   schedule:
-    # only run on a schedule, every 30 minutes
-    - cron:  0/30 * * * *
+    - cron: '0/30 * * * *' # every 30 minutes
+  workflow_dispatch:       # manual trigger
+  pull_request:            # test changes on PRs
 
 jobs:
   update_gamepack:
     runs-on: ubuntu-latest
     container:
-      # image with AdoptOpenJDK 8 and git installed
       image: mahabal/adoptopenjdk8-git:latest
-      volumes:
-        # override /__e/node20 because GitHub Actions uses a version that requires too-recent glibc
-        # see "Install node.js for GitHub Actions" below
-        - /tmp:/__e/node20
 
     steps:
-      - name: Install node.js for GitHub Actions
-        run: |
-          apt-get install -y curl ca-certificates &&
-          # Install a Node.js version that works in older Ubuntu containers (read: does not require very recent glibc)
-          NODE_VERSION=v20.18.1 &&
-          NODE_TAR_FILE=node-$NODE_VERSION-linux-x64-glibc-217.tar.gz &&
-          NODE_URL=https://unofficial-builds.nodejs.org/download/release/$NODE_VERSION/$NODE_TAR_FILE &&
-          curl -Lo /tmp/$NODE_TAR_FILE $NODE_URL &&
-          tar -C /__e/node20 -x --strip-components=1 -f /tmp/$NODE_TAR_FILE
-      - name: Hack to make Git work
-        run: |
-          # one time fix to avoid permission problems later on
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git --version
-      - uses: actions/checkout@v4
+      - name: Checkout current branch
+        uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           ref: ${{ github.ref }}
-        env:
-          PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-      - name: Deploy gamepack
-        run: |
 
-          mkdir -p jav_configs
-          mkdir -p world_list
-          cd gamepacks/
+      - name: Set up Git user
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "noreply@${{ github.actor }}.noreply.github.com"
+
+      - name: Download and extract gamepack
+        run: |
+          mkdir -p jav_configs world_list gamepacks
+          cd gamepacks
 
           curl -sL https://github.com/runetech/osrs-gamepack-downloader/releases/download/v1.3/osrs-gamepack-downloader.jar -o downloader.jar
-
-          REPO=$(echo ${{ github.repository }} | sed "s:.*/::")
-          BRANCH=$(echo ${{ github.ref }} | sed "s:.*/::")
-
-          git remote rm origin
-          git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
-          git config user.name ${{ github.actor }}
-          git config user.email noreply@${{ github.actor }}.noreply.github.com
 
           JAV_CONFIG=$(java -jar downloader.jar -p --dry-run)
           OSRS_REV=$(java -jar downloader.jar -r)
 
-          rm -f downloader.jar
+          rm downloader.jar
 
           git add .
-          git diff-index --quiet HEAD || GIT_AUTHOR_DATE=\"$(date -ur osrs-${OSRS_REV}.jar)\" GIT_COMMITTER_DATE=\"$(date -ur osrs-${OSRS_REV}.jar)\" git commit -am "Add osrs-${OSRS_REV}.jar" && git push origin HEAD:${BRANCH}
+          git diff-index --quiet HEAD || GIT_AUTHOR_DATE="$(date -ur osrs-${OSRS_REV}.jar)" \
+            GIT_COMMITTER_DATE="$(date -ur osrs-${OSRS_REV}.jar)" \
+            git commit -am "Add osrs-${OSRS_REV}.jar"
 
           cd ../jav_configs
           echo "${JAV_CONFIG}" > jav_config_${OSRS_REV}.ws
-          
-          git add .
-          git diff-index --quiet HEAD || git commit -am "Add jav_config.ws for osrs-${OSRS_REV}.jar" && git push origin HEAD:${BRANCH}
-          
-          cd ../world_list
-          line=$(echo "${JAV_CONFIG}" | grep param_17); WORLD_LIST_URL=${line#"param_17="};
-          curl -sL $WORLD_LIST_URL -o slr.ws
-          
-          git add .
-          git diff-index --quiet HEAD || git commit -am "Update world list for for osrs-${OSRS_REV}.jar" && git push origin HEAD:${BRANCH}
 
+          git add .
+          git diff-index --quiet HEAD || git commit -am "Add jav_config.ws for osrs-${OSRS_REV}.jar"
+
+          cd ../world_list
+          WORLD_LIST_URL=$(echo "$JAV_CONFIG" | grep param_17 | cut -d= -f2)
+          curl -sL "$WORLD_LIST_URL" -o slr.ws
+
+          git add .
+          git diff-index --quiet HEAD || git commit -am "Update world list for osrs-${OSRS_REV}.jar"
+
+      - name: Push changes
+        run: |
+          BRANCH=$(echo "${{ github.ref }}" | sed 's|refs/heads/||')
+          git remote set-url origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          git push origin HEAD:$BRANCH
