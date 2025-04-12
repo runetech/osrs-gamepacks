@@ -8,9 +8,6 @@ on:
 jobs:
   update_gamepack:
     runs-on: ubuntu-latest
-    container:
-      image: mahabal/adoptopenjdk8-git:latest
-
     steps:
       - name: Setup Java 8
         uses: actions/setup-java@v3
