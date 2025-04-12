@@ -31,6 +31,7 @@ jobs:
         run: |
           # one time fix to avoid permission problems later on
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git --version
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
