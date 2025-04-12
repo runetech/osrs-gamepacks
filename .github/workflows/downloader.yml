@@ -2,32 +2,32 @@ name: Gamepack CI
 
 on:
   schedule:
-    - cron: '0/30 * * * *' # every 30 minutes
-  workflow_dispatch:       # manual trigger
+    - cron: '0/30 * * * *'  # Every 30 minutes
+  workflow_dispatch:        # Manual trigger
 
 jobs:
   update_gamepack:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Setup Java 8
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: '8'
-      - name: Install Git (just in case)
-        run: sudo apt-get install -y git
-      - name: Checkout current branch
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.ref }}
 
-      - name: Set up Git user
+      - name: Set up Java 8
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '8'
+
+      - name: Configure Git
         run: |
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "noreply@${{ github.actor }}.noreply.github.com"
 
-      - name: Download and extract gamepack
+      - name: Download and process gamepack
         run: |
           mkdir -p jav_configs world_list gamepacks
           cd gamepacks
@@ -36,29 +36,31 @@ jobs:
 
           JAV_CONFIG=$(java -jar downloader.jar -p --dry-run)
           OSRS_REV=$(java -jar downloader.jar -r)
-
           rm downloader.jar
 
           git add .
-          git diff-index --quiet HEAD || GIT_AUTHOR_DATE="$(date -ur osrs-${OSRS_REV}.jar)" \
+          git diff --cached --quiet || \
+            GIT_AUTHOR_DATE="$(date -ur osrs-${OSRS_REV}.jar)" \
             GIT_COMMITTER_DATE="$(date -ur osrs-${OSRS_REV}.jar)" \
             git commit -am "Add osrs-${OSRS_REV}.jar"
 
           cd ../jav_configs
-          echo "${JAV_CONFIG}" > jav_config_${OSRS_REV}.ws
+          echo "$JAV_CONFIG" > jav_config_${OSRS_REV}.ws
 
           git add .
-          git diff-index --quiet HEAD || git commit -am "Add jav_config.ws for osrs-${OSRS_REV}.jar"
+          git diff --cached --quiet || \
+            git commit -am "Add jav_config.ws for osrs-${OSRS_REV}.jar"
 
           cd ../world_list
           WORLD_LIST_URL=$(echo "$JAV_CONFIG" | grep param_17 | cut -d= -f2)
           curl -sL "$WORLD_LIST_URL" -o slr.ws
 
           git add .
-          git diff-index --quiet HEAD || git commit -am "Update world list for osrs-${OSRS_REV}.jar"
+          git diff --cached --quiet || \
+            git commit -am "Update world list for osrs-${OSRS_REV}.jar"
 
       - name: Push changes
         run: |
-          BRANCH=$(echo "${{ github.ref }}" | sed 's|refs/heads/||')
+          BRANCH="${GITHUB_REF#refs/heads/}"
           git remote set-url origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           git push origin HEAD:$BRANCH
