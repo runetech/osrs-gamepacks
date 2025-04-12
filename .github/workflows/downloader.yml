@@ -4,7 +4,6 @@ on:
   schedule:
     - cron: '0/30 * * * *' # every 30 minutes
   workflow_dispatch:       # manual trigger
-  pull_request:            # test changes on PRs
 
 jobs:
   update_gamepack:
