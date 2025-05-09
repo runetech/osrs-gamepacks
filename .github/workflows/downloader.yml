@@ -35,7 +35,9 @@ jobs:
           curl -sL https://github.com/runetech/osrs-gamepack-downloader/releases/download/v1.3/osrs-gamepack-downloader.jar -o downloader.jar
 
           JAV_CONFIG=$(java -jar downloader.jar -p --dry-run)
+          echo "$JAV_CONFIG"
           OSRS_REV=$(java -jar downloader.jar -r)
+          echo "OSRS Revision: $OSRS_REV"
           rm downloader.jar
 
           git add .
@@ -53,6 +55,7 @@ jobs:
 
           cd ../world_list
           WORLD_LIST_URL=$(echo "$JAV_CONFIG" | grep param_17 | cut -d= -f2)
+          echo "Downloading World List from: $WORLD_LIST_URL"
           curl -sL "$WORLD_LIST_URL" -o slr.ws
 
           git add .
