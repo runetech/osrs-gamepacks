@@ -54,7 +54,7 @@ jobs:
             git commit -am "Add jav_config.ws for osrs-${OSRS_REV}.jar"
 
           cd ../world_list
-          WORLD_LIST_URL=$(echo "$JAV_CONFIG" | grep param_17 | cut -d= -f2)
+          WORLD_LIST_URL=$(echo "$JAV_CONFIG" | grep param_17 | cut -d= -f2-)
           echo "Downloading World List from: $WORLD_LIST_URL"
           curl -sL "$WORLD_LIST_URL" -o slr.ws
 
