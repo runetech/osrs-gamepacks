@@ -11,7 +11,7 @@ codebase=http://oldschool37.runescape.com/
 download=331461
 gedigesturl=https://secure.runescape.com/m=itemdb_oldschool/g=oldscape/digest.csv
 initial_class=client.class
-initial_jar=gamepack_7393724.jar
+initial_jar=gamepack_1415960.jar
 mac_sub_version=2
 msg_cancel=Cancel
 msg_changes_on_restart=Your changes will take effect when you next start this program.
