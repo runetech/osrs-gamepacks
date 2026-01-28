@@ -1,8 +1,6 @@
 name: Gamepack CI
 
 on:
-  schedule:
-    - cron: '0/30 * * * *'  # Every 30 minutes
   workflow_dispatch:        # Manual trigger
 
 jobs:
